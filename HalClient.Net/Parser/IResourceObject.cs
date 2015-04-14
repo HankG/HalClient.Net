@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace HalClient.Net.Parser
 {
@@ -10,6 +11,7 @@ namespace HalClient.Net.Parser
     {
         IReadOnlyDictionary<string, IStateValue> State { get; }
         IReadOnlyDictionary<string, IEnumerable<IEmbeddedResourceObject>> Embedded { get; }
+        JObject EmbeddedJObject { get; }
         IReadOnlyDictionary<string, IEnumerable<ILinkObject>> Links { get; }
     }
 }

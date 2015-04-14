@@ -25,9 +25,9 @@ namespace HalClient.Net.Parser
             var embedded = new List<IEmbeddedResourceObject>();
             var state = new List<IStateValue>();
 
-            ParseResourceObject(outer, links, embedded, state);
+            InnerJObjectReturns innerJObjects = ParseResourceObject(outer, links, embedded, state);
 
-            return new RootResourceObject(links, embedded, state);
+            return new RootResourceObject(links, embedded, innerJObjects.EmbeddedJObject, state);
         }
 
         private static EmbeddedResourceObject ParseEmbeddedResourceObject(JObject outer, string rel)
@@ -36,13 +36,15 @@ namespace HalClient.Net.Parser
             var embedded = new List<IEmbeddedResourceObject>();
             var state = new List<IStateValue>();
 
-            ParseResourceObject(outer, links, embedded, state);
+            InnerJObjectReturns innerJObjects = ParseResourceObject(outer, links, embedded, state);
 
-            return new EmbeddedResourceObject(links, embedded, state, rel);
+            return new EmbeddedResourceObject(links, embedded, innerJObjects.EmbeddedJObject, state, rel);
         }
 
-        private static void ParseResourceObject(JObject outer, List<ILinkObject> links, List<IEmbeddedResourceObject> embedded, List<IStateValue> state)
+        private static InnerJObjectReturns ParseResourceObject(JObject outer, List<ILinkObject> links, List<IEmbeddedResourceObject> embedded, List<IStateValue> state)
         {
+            InnerJObjectReturns returnJObjects = new InnerJObjectReturns();
+
             foreach (var inner in outer.Properties())
             {
                 var type = inner.Value.Type.ToString();
@@ -57,6 +59,7 @@ namespace HalClient.Net.Parser
                             links.AddRange(ParseObjectOrArrayOfObjects(value, ParseLinkObject));
                             break;
                         case "_embedded":
+                            returnJObjects.EmbeddedJObject = value;
                             embedded.AddRange(ParseObjectOrArrayOfObjects(value, ParseEmbeddedResourceObject));
                             break;
                         default:
@@ -80,6 +83,8 @@ namespace HalClient.Net.Parser
                     }
                 }
             }
+
+            return returnJObjects;
         }
 
         private static LinkObject ParseLinkObject(JObject outer, string rel)
@@ -149,6 +154,11 @@ namespace HalClient.Net.Parser
             {
                 return null;
             }
+        }
+
+        private struct InnerJObjectReturns
+        {
+            public JObject EmbeddedJObject;
         }
     }
 }

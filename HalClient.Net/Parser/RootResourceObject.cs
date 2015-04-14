@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using HalClient.Net.External;
+using Newtonsoft.Json.Linq;
 
 namespace HalClient.Net.Parser
 {
     internal class RootResourceObject : ResourceObjectBase, IRootResourceObject
     {
-        public RootResourceObject(IEnumerable<ILinkObject> links, IEnumerable<IEmbeddedResourceObject> embedded, List<IStateValue> state) 
-            : base(state, embedded, links)
+        public RootResourceObject(IEnumerable<ILinkObject> links, IEnumerable<IEmbeddedResourceObject> embedded, JObject embeddedJObject, List<IStateValue> state) 
+            : base(state, embedded, embeddedJObject, links)
         {
         }
 

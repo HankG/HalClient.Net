@@ -2,6 +2,8 @@
 using System.Linq;
 using HalClient.Net.Parser;
 using Xunit;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace HalClient.Net.Tests
 {
@@ -110,6 +112,21 @@ namespace HalClient.Net.Tests
         }
 
         [Fact]
+        public void EmbeddedParsing_ObjectParsing_ParsesCorrectStateValues()
+        {
+            var resource = _parser.ParseResource(Json);
+            var order = resource.Embedded["ea:order"].First();
+            JObject embeddedObjects = resource.EmbeddedJObject;
+            JToken orderToken = embeddedObjects["ea:order"].Children().ToList().First();
+            Order orderObject = JsonConvert.DeserializeObject<Order>(orderToken.ToString());
+
+            Assert.NotNull(orderObject);
+            Assert.Equal(30.00f, orderObject.Total);
+            Assert.Equal("USD", orderObject.Currency);
+            Assert.Equal("shipped", orderObject.Status);
+        }
+
+        [Fact]
         public void StateParsing_ParsesCorrectNumberOfStateValues()
         {
             var resource = _parser.ParseResource(Json);
@@ -169,6 +186,30 @@ namespace HalClient.Net.Tests
 
             Assert.True(resource.Links["ea:admin"].Any(x => x.Title.Equals("Kate")));
             Assert.True(resource.Links["ea:admin"].Any(x => x.Title.Equals("Fred")));
+        }
+
+        private class Order
+        {
+            public Order()
+            {
+
+            }
+
+            public double Total { get; set; }
+            public string Currency { get; set; }
+            public string Status { get; set; }
+
+            public override string ToString()
+            {
+                return string.Format("{0} {1} {2}", this.Currency, this.Total, this.Status);
+            }
+        }
+
+        private struct OrderStatistics
+        {
+            public int CurrentlyProcessing;
+            public int ShippedToday;
+ 
         }
     }
 }
